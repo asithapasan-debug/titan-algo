@@ -79,13 +79,17 @@ const Engine = {
         try {
             this.DB.coins = await fCoins();
             await this.saveDB();
-        } catch(e) {}
+        } catch(e) {
+            console.error("❌ INITIAL COIN FETCH FAILED:", e.message);
+        }
         
         setInterval(async () => {
             try {
                 this.DB.coins = await fCoins();
                 await this.saveDB();
-            } catch(e){}
+            } catch(e){
+                console.error("❌ INTERVAL COIN FETCH FAILED:", e.message);
+            }
         }, 30 * 60 * 1000);
         
         this.loop();
@@ -137,7 +141,9 @@ const Engine = {
         for (const sym of symbols) {
             try {
                 await this.scanCoin(sym);
-            } catch (e) {}
+            } catch (e) {
+                console.error(`❌ SCAN FAILED FOR ${sym}:`, e.message);
+            }
             await new Promise(r => setTimeout(r, 500));
         }
         
