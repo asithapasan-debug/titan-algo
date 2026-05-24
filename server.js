@@ -8,6 +8,22 @@ const { generateChartBuffer } = require('./chartGenerator.js');
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const DASHBOARD_USER = process.env.DASHBOARD_USER || 'admin';
+const DASHBOARD_PASS = process.env.DASHBOARD_PASS || 'titan2026';
+
+app.get('/dashboard.html', (req, res, next) => {
+    const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
+    const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
+
+    if (login === DASHBOARD_USER && password === DASHBOARD_PASS) {
+        return next();
+    }
+    
+    res.set('WWW-Authenticate', 'Basic realm="401"');
+    res.status(401).send('Authentication required to access the admin dashboard.');
+});
+
 app.use(express.static(__dirname));
 
 const PORT = process.env.PORT || 3000;
