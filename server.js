@@ -109,6 +109,15 @@ app.get('/api/state', (req, res) => {
     res.json(Engine.getState());
 });
 
+app.get('/api/clear-now-1234', (req, res) => {
+    Engine.DB.sigs5 = [];
+    Engine.DB.sigs15 = [];
+    Engine.DB.sigs1h = [];
+    Engine.DB.stats = { today: { wins: 0, losses: 0, pnl: 0, reported: false }, date: new Date().toISOString().split('T')[0] };
+    Engine.saveDB();
+    res.send("Successfully wiped all data!");
+});
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`========================================`);
     console.log(`⚡ Titan Algo Engine & Web Server started on port ${PORT}`);
