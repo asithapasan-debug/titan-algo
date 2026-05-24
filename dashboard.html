@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Titan Algo - Premium Futures Signals</title>
+<link rel="stylesheet" href="css/styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+</head>
+<body>
+
+<div id="notif-banner" style="display:none">
+  <span>🔔 Enable desktop notifications for signal alerts</span>
+  <button onclick="reqNotifPerm()">Enable</button>
+  <span onclick="document.getElementById('notif-banner').style.display='none'" style="cursor:pointer;margin-left:auto">✕</span>
+</div>
+
+<div id="hdr">
+  <div id="logo">⚡ TITAN ALGO</div>
+  <div id="lp">—</div><div id="pc"></div>
+  <div id="navtabs">
+    <button class="tbtn on" id="btn-audio" onclick="toggleAudio()">🔔 Audio</button>
+    <button class="tbtn" id="btn-notif" onclick="reqNotifPerm()">🖥 Notify</button>
+
+    <button class="nbtn act" onclick="swV('chart')">🖥️ Dashboard</button>
+    <button class="nbtn" onclick="swV('report')">📈 Report</button>
+    <button class="nbtn" onclick="swV('backtest')">⏪ Backtest</button>
+  </div>
+</div>
+
+<div id="ctabs"><span style="color:var(--mu);font-size:11px;padding:8px 0">Loading…</span></div>
+
+<div id="tfbar">
+  <span style="font-size:10px;color:var(--mu)">Signals:</span>
+  <button class="tfbtn act" id="tf5btn" onclick="setTF('5m')">5m Scalp</button>
+  <button class="tfbtn tf15" id="tf15btn" onclick="setTF('15m')">15m Swing</button>
+  <button class="tfbtn tf1h" id="tf1hbtn" onclick="setTF('1h')">1h Trend</button>
+  <div id="tf-info" style="font-size:10px;color:var(--mu);margin-left:14px">5m chart &middot; 15m+1h confirm &nbsp;|&nbsp; Min score: <b style="color:var(--ye)">10/23</b></div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<div id="main">
+  <div id="cview" style="display:flex; flex-wrap:wrap; gap:16px; padding:16px; overflow-y:auto; align-items:flex-start">
+    <div id="loading" style="display:none; width:100%; justify-content:center; padding:40px; color:var(--mu)">
+      <div class="spin"></div><span style="margin-left:10px">Loading data...</span>
+    </div>
+
+    <!-- Active Trades Panel -->
+    <div id="active-panel" style="flex:1; min-width:300px; background:var(--bg2); border:1px solid var(--bd); border-radius:6px; padding:12px">
+      <div class="st">Active Trades</div>
+      <div id="active-sigs-list"><div style="font-size:10px;color:var(--mu)">No active trades</div></div>
+    </div>
+
+    <!-- Current Signal Panel -->
+    <div class="ss" id="sig-panel" style="flex:1; min-width:300px; background:var(--bg2); border:1px solid var(--bd); border-radius:6px; padding:12px">
+        <div class="st" id="sig-tf-label">Signal</div>
+        <div id="waiting-state">
+          <div class="wt-score" id="wt-score">—</div>
+          <div class="wt-label">Score too low — waiting</div>
+          <div class="wt-bar"><div class="wt-fill" id="wt-fill" style="width:0%"></div></div>
+          <div style="font-size:10px;color:var(--mu)">Need <b style="color:var(--ye)">10+</b> to trigger signal</div>
+        </div>
+        <div id="sig-active" style="display:none">
+          <div id="sdir" style="color:var(--mu)">—</div>
+          <div id="sstr" style="color:var(--mu)">—</div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mu)">
+            <span>Score</span><span id="stxt">—</span>
+          </div>
+          <div id="scbar"><div id="scfill" style="width:0%"></div></div>
+          <div style="margin-top:6px">
+            <div class="sr"><span class="slb">Entry</span><span class="svl" id="se">—</span></div>
+            <div class="sr"><span class="slb" style="color:var(--re)">Stop Loss</span><span class="svl" id="ssl" style="color:var(--re)">—</span></div>
+            <div class="sr"><span class="slb" style="color:#52c41a">TP1</span><span class="svl" id="st1" style="color:#52c41a">—</span></div>
+            <div class="sr"><span class="slb" style="color:var(--gr)">TP2</span><span class="svl" id="st2" style="color:var(--gr)">—</span></div>
+            <div class="sr"><span class="slb">R:R</span><span class="svl" id="srr">—</span></div>
+          </div>
+        </div>
+      </div>
+
+    <div style="flex:1; min-width:300px; display:flex; flex-direction:column; gap:16px">
+      <div class="ss" id="conf-panel" style="display:none; background:var(--bg2); border:1px solid var(--bd); border-radius:6px; padding:12px">
+        <div class="st">Confirmed By</div>
+        <ul id="rlist"></ul>
+      </div>
+
+      <div class="ss" style="background:var(--bg2); border:1px solid var(--bd); border-radius:6px; padding:12px">
+        <div class="st">Indicators</div>
+        <div class="ir"><span class="in">RSI 14</span><span class="iv" id="i-rsi">—</span></div>
+        <div class="ir"><span class="in">EMA Cross</span><span class="iv" id="i-ema">—</span></div>
+        <div class="ir"><span class="in">ATR</span><span class="iv" id="i-atr">—</span></div>
+        <div class="ir"><span class="in">BB Position</span><span class="iv" id="i-bb">—</span></div>
+        <div class="ir"><span class="in">Volume</span><span class="iv" id="i-vol">—</span></div>
+      </div>
+
+      <div class="ss" style="background:var(--bg2); border:1px solid var(--bd); border-radius:6px; padding:12px">
+        <div class="st">Futures Data</div>
+        <div class="ir"><span class="in">Funding Rate</span><span class="iv" id="ifr">—</span></div>
+        <div class="ir"><span class="in">Open Interest</span><span class="iv" id="ioi">—</span></div>
+        <div class="ir"><span class="in">Structure</span><span class="iv" id="ist">—</span></div>
+        <div class="ir"><span class="in">HTF1 Trend</span><span class="iv" id="i15">—</span></div>
+        <div class="ir"><span class="in">HTF2 Trend</span><span class="iv" id="i1h">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="rview">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="font-size:15px;font-weight:500">Signal Performance Report</span>
+      <div>
+        <button id="exbtn" onclick="expCSV()">⬇ Export CSV</button>
+        <button id="clrbtn" onclick="clearSigs()">🗑 Clear All</button>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+      <div style="font-size:15px;font-weight:500;color:var(--tx)">Live Signal Performance</div>
+      <select id="rep-tf" onchange="renRep()" style="background:var(--bg3); border:1px solid var(--bd); color:var(--tx); padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer">
+        <option value="all">All Timeframes</option>
+        <option value="5m">5m Scalp</option>
+        <option value="15m">15m Swing</option>
+        <option value="1h">1h Trend</option>
+      </select>
+    </div>
+    <div class="sg" id="sgrid"></div>
+    <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">By Timeframe & Strength</div>
+    <div class="bktbl">
+      <div class="bkh"><span>TF</span><span>Strength</span><span>Count</span><span>Win Rate</span><span>Avg Score</span></div>
+      <div id="bkbody"></div>
+    </div>
+    <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Signal History</div>
+    <div id="htbl">
+      <div class="th"><span>Time</span><span>TF</span><span>Sym</span><span>Dir</span><span>Entry</span><span>SL→TP1</span><span>Score</span><span>Outcome</span></div>
+      <div id="hbody"></div>
+    </div>
+  </div>
+
+  <div id="bview" style="display:none; flex:1; overflow-y:auto; padding:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+      <span style="font-size:15px; font-weight:500">Historical Backtesting Engine</span>
+    </div>
+    <div style="background:var(--bg2); border:1px solid var(--bd); border-radius:6px; padding:14px; margin-bottom:16px; display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap">
+      <div><div style="font-size:10px; color:var(--mu); margin-bottom:4px">Symbol</div><input type="text" id="bt-sym" value="BTCUSDT" style="background:var(--bg3); border:1px solid var(--bd); color:var(--tx); padding:6px; border-radius:4px; width:80px; font-size:12px"></div>
+      <div><div style="font-size:10px; color:var(--mu); margin-bottom:4px">TF</div><select id="bt-tf" style="background:var(--bg3); border:1px solid var(--bd); color:var(--tx); padding:6px; border-radius:4px; width:60px; font-size:12px"><option value="5m">5m</option><option value="15m">15m</option><option value="1h">1h</option></select></div>
+      <div><div style="font-size:10px; color:var(--mu); margin-bottom:4px">Days</div><input type="number" id="bt-days" value="30" style="background:var(--bg3); border:1px solid var(--bd); color:var(--tx); padding:6px; border-radius:4px; width:60px; font-size:12px"></div>
+      <div><div style="font-size:10px; color:var(--mu); margin-bottom:4px">Min Score</div><input type="number" id="bt-score" value="10" style="background:var(--bg3); border:1px solid var(--bd); color:var(--tx); padding:6px; border-radius:4px; width:60px; font-size:12px"></div>
+      <div><div style="font-size:10px; color:var(--mu); margin-bottom:4px">SL (ATR)</div><input type="number" id="bt-sl" value="1.5" step="0.1" style="background:var(--bg3); border:1px solid var(--bd); color:var(--tx); padding:6px; border-radius:4px; width:70px; font-size:12px"></div>
+      <div><div style="font-size:10px; color:var(--mu); margin-bottom:4px">TP (ATR)</div><input type="number" id="bt-tp" value="1.5" step="0.1" style="background:var(--bg3); border:1px solid var(--bd); color:var(--tx); padding:6px; border-radius:4px; width:70px; font-size:12px"></div>
+      <button id="bt-run-btn" onclick="BT.run()" style="background:var(--bl); border:none; color:#fff; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:600; height:29px">Run Backtest</button>
+      <div id="bt-prog" style="font-size:11px; color:var(--mu); margin-left:10px"></div>
+    </div>
+    <div class="sg" id="bt-metrics" style="grid-template-columns:repeat(4,1fr)"></div>
+    <div style="background:var(--bg2); border:1px solid var(--bd); border-radius:6px; padding:10px; margin-bottom:16px; height:250px"><div id="bt-chart" style="width:100%; height:100%"></div></div>
+    <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Simulated Trades</div>
+    <div id="htbl"><div class="th" style="grid-template-columns:75px 65px 35px 55px 100px 40px 130px"><span>Time</span><span>Sym</span><span>Dir</span><span>Entry</span><span>SL→TP1</span><span>Score</span><span>Outcome</span></div><div id="bt-history"></div></div>
+  </div>
+</div>
+
+<div id="stbar">
+  <span><span id="sdot"></span><span id="stxt2">Connecting…</span></span>
+  <span id="ssym"></span><span id="sref"></span>
+  <span id="s5cnt"></span><span id="s15cnt"></span><span id="s1hcnt"></span>
+  <span style="margin-left:auto">Min score 15/23 · WS connection</span>
+</div>
+
+<script src="js/indicators.js"></script>
+<script src="js/api.js"></script>
+<script src="js/signalEngine.js"></script>
+
+<script src="js/backtester.js?v=2"></script>
+<script src="js/app.js?v=2"></script>
+</body>
+</html>
