@@ -175,73 +175,10 @@ function swV(v){ST.view=v;document.getElementById('cview').style.display=v==='ch
 function selCoin(s){if(s===ST.coin)return;ST.coin=s;ST.c5=[];ST.c15=[];ST.c1h=[];ST.curSig5=null;ST.curSig15=null;ST.curSig1h=null;document.getElementById('loading').style.display='flex';document.querySelectorAll('.ctab').forEach(t=>t.classList.toggle('act',t.textContent.trim().startsWith(s.replace('USDT',''))));initDataFetch()}
 
 // ── WEBSOCKET INTEGRATION ───────────────────────────────────────────────────
-let ws=null;
-let lastRenderTime=0;
-let wsLastMsgTime=0;
-
+// Removed: The frontend is now a pure viewer and relies on 5-second polling to the Cloud Engine.
 function connectWS() {
-  if(ws) ws.close();
-  const lowerSym = ST.coin.toLowerCase();
-  let streams = `${lowerSym}@kline_5m/${lowerSym}@kline_15m/${lowerSym}@kline_1h/${lowerSym}@kline_4h/${lowerSym}@kline_1d/${lowerSym}@markPrice@1s`;
-  ws = new WebSocket(`wss://fstream.binance.com/stream?streams=${streams}`);
-  
-  ws.onopen = () => {
-    document.getElementById('stxt2').textContent='● Live (WS)';
+    document.getElementById('stxt2').textContent='● Live (Cloud)';
     document.getElementById('sdot').style.background='#0ecb81';
-  };
-  
-  ws.onmessage = (event) => {
-    wsLastMsgTime = Date.now();
-    const data = JSON.parse(event.data);
-    if (!data.data) return;
-    
-    if (data.data.e === 'markPriceUpdate') {
-      ST.fr = parseFloat(data.data.r);
-      const frEl = document.getElementById('ifr');
-      if (frEl && ST.fr != null) {
-        frEl.innerHTML = '<span style="color:'+(ST.fr<0?'#0ecb81':'#f6465d')+'">'+(ST.fr*100).toFixed(4)+'%</span>';
-      }
-      return;
-    }
-    
-    if (!data.data.k) return;
-    
-    const k = data.data.k;
-    const interval = k.i;
-    const sym = k.s;
-    const candle = { t: new Date(k.t), o: +k.o, h: +k.h, l: +k.l, c: +k.c, v: +k.v };
-    
-    
-    let arr = null;
-    if (interval === '5m') arr = ST.c5;
-    if (interval === '15m') arr = ST.c15;
-    if (interval === '1h') arr = ST.c1h;
-    if (interval === '4h') arr = ST.c4h;
-    if (interval === '1d') arr = ST.c1d;
-    
-    if (arr && arr.length > 0) {
-      const last = arr[arr.length - 1];
-      if (last.t.getTime() === candle.t.getTime()) {
-        arr[arr.length - 1] = candle; // Update current candle
-      } else if (candle.t.getTime() > last.t.getTime()) {
-        arr.push(candle); // New candle
-        if (arr.length > 200) arr.shift(); // Keep 200
-      }
-    }
-    
-    // Throttle UI updates to ~2 times per second max to avoid lag
-    const now = Date.now();
-    if (now - lastRenderTime > 500) {
-      lastRenderTime = now;
-      processDataUpdate();
-    }
-  };
-  
-  ws.onclose = () => {
-    document.getElementById('stxt2').textContent='⚠ WS Disconnected';
-    document.getElementById('sdot').style.background='#f6465d';
-    setTimeout(connectWS, 3000); // Reconnect
-  };
 }
 
 function processDataUpdate() {
@@ -326,25 +263,8 @@ async function initDataFetch() {
 }
 
 // ── GLOBAL WEBSOCKET ──────────────────────────────────────────────────────────
+// Removed global ticker websocket. Data is now fetched via /api/state
 let globalWs = null;
-function connectGlobalWS() {
-  if (globalWs) globalWs.close();
-  globalWs = new WebSocket('wss://fstream.binance.com/ws/!ticker@arr');
-  globalWs.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (!Array.isArray(data)) return;
-    for (const t of data) {
-      const coinIndex = ST.coins.findIndex(c => c.symbol === t.s);
-      if (coinIndex !== -1) {
-        ST.coins[coinIndex].priceChangePercent = t.P;
-        ST.coins[coinIndex].quoteVolume = t.q;
-        const tab = document.getElementById('ctab-' + t.s);
-        if (tab) {
-          const p = parseFloat(t.P);
-          const pctEl = tab.querySelector('.pct');
-          if (pctEl) {
-            pctEl.textContent = (p >= 0 ? '+' : '') + p.toFixed(2) + '%';
-            pctEl.style.color = p >= 0 ? '#0ecb81' : '#f6465d';
           }
         }
       }
