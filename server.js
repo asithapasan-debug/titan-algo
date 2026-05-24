@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const TelegramBot = require('node-telegram-bot-api');
 const Engine = require('./server_engine.js');
+const { generateChartBuffer } = require('./chartGenerator.js');
 
 const app = express();
 app.use(cors());
@@ -30,7 +31,7 @@ if (TELEGRAM_TOKEN && TELEGRAM_TOKEN !== 'YOUR_TOKEN_HERE') {
     console.warn('WARNING: TELEGRAM_TOKEN is not set in .env. Telegram integration is disabled.');
 }
 
-async function handleNewSignal(sig) {
+async function handleNewSignal(sig, candles) {
     console.log(`[BACKEND] Generated ${sig.dir} signal for ${sig.sym} (Score: ${sig.sc}/23) [${sig.tf}]`);
     const chatId = getChatId(sig.tf);
     if (bot && chatId && !chatId.includes('YOUR_')) {
@@ -61,10 +62,23 @@ ${sig.reasons.map(r => `• ${r.replace(/</g, '&lt;').replace(/>/g, '&gt;')}`).j
 `.trim();
 
         try {
-            await bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
-            console.log(`Signal broadcasted to Telegram successfully (${sig.tf})!`);
+            if (candles && candles.length > 0) {
+                const chartBuffer = await generateChartBuffer(sig, candles);
+                await bot.sendPhoto(chatId, chartBuffer, { caption: message, parse_mode: 'HTML' });
+                console.log(`Signal + Chart broadcasted to Telegram successfully (${sig.tf})!`);
+            } else {
+                await bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
+                console.log(`Signal broadcasted to Telegram successfully (${sig.tf})!`);
+            }
         } catch (e) {
-            console.error('Failed to send Telegram signal:', e.message);
+            console.error('Failed to send Telegram signal/chart:', e.message);
+            // Fallback to text message
+            try {
+                await bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
+                console.log(`Signal broadcasted to Telegram as text fallback (${sig.tf})!`);
+            } catch (err) {
+                console.error('Text fallback failed:', err.message);
+            }
         }
     }
 }

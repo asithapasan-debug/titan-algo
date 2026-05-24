@@ -173,19 +173,19 @@ const Engine = {
         const sig5 = genSig(c5, c15, c1h, c1d, fr, '5m', sym);
         if (sig5 && sig5.sc >= 15 && !this.DB.sigs5.find(s => s.id === sig5.id)) {
             this.DB.sigs5.unshift(sig5);
-            if (this.onNewSignal) this.onNewSignal(sig5);
+            if (this.onNewSignal) this.onNewSignal(sig5, c5);
         }
         
         const sig15 = genSig(c15, c1h, c4h, c1d, fr, '15m', sym);
         if (sig15 && sig15.sc >= 15 && !this.DB.sigs15.find(s => s.id === sig15.id)) {
             this.DB.sigs15.unshift(sig15);
-            if (this.onNewSignal) this.onNewSignal(sig15);
+            if (this.onNewSignal) this.onNewSignal(sig15, c15);
         }
         
         const sig1h = genSig(c1h, c4h, c1d, c1d, fr, '1h', sym);
         if (sig1h && sig1h.sc >= 15 && !this.DB.sigs1h.find(s => s.id === sig1h.id)) {
             this.DB.sigs1h.unshift(sig1h);
-            if (this.onNewSignal) this.onNewSignal(sig1h);
+            if (this.onNewSignal) this.onNewSignal(sig1h, c1h);
         }
         
         this.saveDB();
