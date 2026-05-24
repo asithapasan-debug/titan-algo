@@ -265,13 +265,7 @@ async function initDataFetch() {
 // ── GLOBAL WEBSOCKET ──────────────────────────────────────────────────────────
 // Removed global ticker websocket. Data is now fetched via /api/state
 let globalWs = null;
-          }
-        }
-      }
-    }
-  };
-  globalWs.onclose = () => setTimeout(connectGlobalWS, 5000);
-}
+
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init(){
@@ -291,7 +285,6 @@ async function init(){
     ST.coins=coins;ST.coin=coins[0]?.symbol||'BTCUSDT';
     updHdr();
     await initDataFetch();
-    connectGlobalWS();
     
     // Periodically re-sort the top coins header list
     setInterval(() => {
