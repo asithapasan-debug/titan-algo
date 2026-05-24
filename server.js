@@ -46,12 +46,13 @@ ${icon} <b>TITAN ALGO SIGNAL</b> ${icon}
 <b>Timeframe:</b> ${sig.tf}
 <b>Signal Strength:</b> ${sig.str} (${sig.sc}/23)
 
-<b>🎯 ENTRY ZONE:</b> ${sig.entry}
+<b>🎯 ENTRY ZONE:</b> ${Number(sig.entryLow).toPrecision(5)} - ${Number(sig.entryHigh).toPrecision(5)}
 
-<b>🛡️ STOP LOSS:</b> ${sig.sl}
+<b>🛡️ STOP LOSS:</b> ${Number(sig.sl).toPrecision(5)}
 
-<b>💰 TAKE PROFIT 1:</b> ${sig.tp1}
-<b>💰 TAKE PROFIT 2:</b> ${sig.tp2}
+<b>💰 TAKE PROFIT 1:</b> ${Number(sig.tp1).toPrecision(5)}
+<b>💰 TAKE PROFIT 2:</b> ${Number(sig.tp2).toPrecision(5)}
+<b>💰 TAKE PROFIT 3:</b> ${Number(sig.tp3).toPrecision(5)}
 
 <b>📊 Confluence Reasons:</b>
 ${sig.reasons.map(r => `• ${r.replace(/</g, '&lt;').replace(/>/g, '&gt;')}`).join('\n')}
@@ -73,6 +74,7 @@ async function handleOutcome(sig) {
     const chatId = getChatId(sig.tf);
     if (bot && chatId && !chatId.includes('YOUR_')) {
         const m = {
+            TP3_HIT: { i: '🚀', t: 'TAKE PROFIT 3 HIT' },
             TP2_HIT: { i: '🎯', t: 'TAKE PROFIT 2 HIT' },
             TP1_HIT: { i: '✅', t: 'TAKE PROFIT 1 HIT' },
             SL_HIT: { i: '🛑', t: 'STOP LOSS HIT' }
@@ -85,7 +87,7 @@ ${hit.i} <b>${hit.t}</b> ${hit.i}
 <b>Pair:</b> #${sig.sym.replace('USDT', '')}
 <b>Direction:</b> ${sig.dir}
 <b>Entry Price:</b> ${sig.entry}
-<b>Closed At:</b> ${sig.out === 'SL_HIT' ? sig.sl : (sig.out === 'TP1_HIT' ? sig.tp1 : sig.tp2)}
+<b>Closed At:</b> ${sig.out === 'SL_HIT' ? Number(sig.sl).toPrecision(5) : (sig.out === 'TP1_HIT' ? Number(sig.tp1).toPrecision(5) : (sig.out === 'TP2_HIT' ? Number(sig.tp2).toPrecision(5) : Number(sig.tp3).toPrecision(5)))}
 
 <i>This outcome has been logged in our daily performance tracker! 📈</i>
 `.trim();
@@ -98,7 +100,7 @@ ${hit.i} <b>${hit.t}</b> ${hit.i}
         }
     }
     
-    if (sig.out === 'TP1_HIT' || sig.out === 'TP2_HIT') {
+    if (sig.out === 'TP1_HIT' || sig.out === 'TP2_HIT' || sig.out === 'TP3_HIT') {
         Engine.updateStats(1, 0, 1);
     } else if (sig.out === 'SL_HIT') {
         Engine.updateStats(0, 1, -1);

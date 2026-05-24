@@ -56,11 +56,17 @@ function genSig(primary,htf1,htf2,macro,fr,tf,sym=ST.coin, customSlM=null, custo
   const slM = customSlM || defM;
   const tpM = customTpM || slM;
   
-  const sl2=il?pr-cat*slM:pr+cat*slM,tp1=il?pr+cat*tpM:pr-cat*tpM,tp2=il?pr+cat*(tpM*2):pr-cat*(tpM*2);
+  const sl2=il?pr-cat*slM:pr+cat*slM;
+  const tp1=il?pr+cat*tpM:pr-cat*tpM;
+  const tp2=il?pr+cat*(tpM*1.5):pr-cat*(tpM*1.5);
+  const tp3=il?pr+cat*(tpM*2.5):pr-cat*(tpM*2.5);
+  const entryLow=il?pr-cat*0.3:pr;
+  const entryHigh=il?pr:pr+cat*0.3;
+  
   const candleTime = primary[primary.length-1].t.getTime();
   const sigId = sym + '_' + tf + '_' + candleTime;
   
-  return{id:sigId,sym:sym,tf,dir:il?'LONG':'SHORT',str,sc,mx:23,entry:pr,sl:sl2,tp1,tp2,rr:Math.abs(tp1-pr)/Math.abs(sl2-pr),reasons,ts:candleTime,out:'PENDING',rsi:crs,e9v:e9[n],e21v:e21[n],st,h1lbl:h1l,h2lbl:h2l,h1:bH1?'BULL':'BEAR',h2:bH2?'BULL':'BEAR',fr,bbu:cbu,bbl:cbl,cat,avgVol:avv,curVol:cuv,vwap:cVWAP};
+  return{id:sigId,sym:sym,tf,dir:il?'LONG':'SHORT',str,sc,mx:23,entry:pr,entryLow,entryHigh,sl:sl2,tp1,tp2,tp3,rr:Math.abs(tp1-pr)/Math.abs(sl2-pr),reasons,ts:candleTime,out:'PENDING',rsi:crs,e9v:e9[n],e21v:e21[n],st,h1lbl:h1l,h2lbl:h2l,h1:bH1?'BULL':'BEAR',h2:bH2?'BULL':'BEAR',fr,bbu:cbu,bbl:cbl,cat,avgVol:avv,curVol:cuv,vwap:cVWAP};
 }
 
 if (typeof module !== 'undefined' && module.exports) {

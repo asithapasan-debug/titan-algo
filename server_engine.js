@@ -208,20 +208,24 @@ const Engine = {
                 if (ct === st2) {
                     if (s.dir === 'LONG') {
                         if (c.c <= s.sl) { out = 'SL_HIT'; break; }
+                        if (c.c >= s.tp3) { out = 'TP3_HIT'; break; }
                         if (c.c >= s.tp2) { out = 'TP2_HIT'; break; }
                         if (c.c >= s.tp1) { out = 'TP1_HIT'; break; }
                     } else {
                         if (c.c >= s.sl) { out = 'SL_HIT'; break; }
+                        if (c.c <= s.tp3) { out = 'TP3_HIT'; break; }
                         if (c.c <= s.tp2) { out = 'TP2_HIT'; break; }
                         if (c.c <= s.tp1) { out = 'TP1_HIT'; break; }
                     }
                 } else {
                     if (s.dir === 'LONG') {
                         if (c.l <= s.sl) { out = 'SL_HIT'; break; }
+                        if (c.h >= s.tp3) { out = 'TP3_HIT'; break; }
                         if (c.h >= s.tp2) { out = 'TP2_HIT'; break; }
                         if (c.h >= s.tp1) { out = 'TP1_HIT'; break; }
                     } else {
                         if (c.h >= s.sl) { out = 'SL_HIT'; break; }
+                        if (c.l <= s.tp3) { out = 'TP3_HIT'; break; }
                         if (c.l <= s.tp2) { out = 'TP2_HIT'; break; }
                         if (c.l <= s.tp1) { out = 'TP1_HIT'; break; }
                     }
